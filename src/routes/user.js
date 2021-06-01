@@ -1,5 +1,6 @@
 const express = require('express')
 const multer = require('multer')
+const sharp = require('sharp')
 const { Router } = require('express');
 
 const User = require('../models/user')
@@ -22,8 +23,10 @@ const upload = multer({
 })
 
 router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
-       
-    req.user.avatar = req.file.buffer
+    
+    const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
+
+    req.user.avatar = buffer
     console.log(req.user.avatar)
     await req.user.save()
     res.status(200).send('uploded')
@@ -38,13 +41,17 @@ router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
 //     res.send()
 // })
 
-router.get('/avatar', (req, res) => {
+// src={`data:image/jpeg;base64,${this.state.avatar}`}
 
+router.get('/avatar', auth, async (req, res) => {
     try{
-        // console.log(req.headers['id'])
-        const user = await User.findById(req.headers['id'])
-        res.set('Content-Type', 'image/jpg')
-        res.status(200).send(req.user.avatar)
+        if(req.user.avatar){
+            var thumb = new Buffer(req.user.avatar).toString('base64');
+            res.status(200).send(thumb);
+        }else{
+            res.send(201).send()
+        }
+        
     }catch(e){
         res.status(400).send()
     }
