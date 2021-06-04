@@ -34,15 +34,8 @@ router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
     res.status(500).send({error: error.message})
 })
 
-// router.delete('/users/me/avatar', auth, async (req, res) => {
-//     req.user.avatar = undefined
-//     await req.user.save()
-//     res.send()
-// })
-
-// src={`data:image/jpeg;base64,${this.state.avatar}`}
-
 router.get('/avatar', auth, async (req, res) => {
+    console.log("reached")
     try{
         if(req.user.avatar){
             var thumb = new Buffer(req.user.avatar).toString('base64');
@@ -54,6 +47,13 @@ router.get('/avatar', auth, async (req, res) => {
     }catch(e){
         res.status(400).send()
     }
+})
+
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+    req.user.avatar = undefined
+    await req.user.save()
+    res.send()
 })
 
 
@@ -71,7 +71,6 @@ try{
     })
 
 
-
 router.post('/login', async (req, res) =>{
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
@@ -82,6 +81,31 @@ router.post('/login', async (req, res) =>{
     }
 
 })
+
+
+router.patch('/user/name', auth, async (req, res) => {
+    const name = req.body
+    console.log(name)
+
+    try {
+         req.user.name = req.body.name
+        await req.user.save()
+        res.send(req.user)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
+
+router.delete('/user/me', auth, async (req, res) => {
+    console.log("reached")
+    try {
+        await req.user.remove()
+        res.send(req.user)
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
 
 module.exports = router;
 
