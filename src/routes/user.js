@@ -35,7 +35,6 @@ router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
 })
 
 router.get('/avatar', auth, async (req, res) => {
-    console.log("reached")
     try{
         if(req.user.avatar){
             var thumb = new Buffer(req.user.avatar).toString('base64');
@@ -58,7 +57,7 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
 
 
 router.post('/register', async (req, res) =>{
- 
+ console.log('register')
 try{
     const user = new User(req.body);
     const token = await user.generateAuthToken()
@@ -72,6 +71,7 @@ try{
 
 
 router.post('/login', async (req, res) =>{
+    console.log("login")
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken()
