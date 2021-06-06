@@ -3,10 +3,9 @@ var bodyParser = require('body-parser')
 const cors = require('cors');
 
 const userRouter = require('./routes/user')
+const postsRouter = require('./routes/posts')
 
 require('./db/mongoose')
-
-var jsonParser = bodyParser.json()
          
 const app = express()
 const port = process.env.PORT || 9000
@@ -14,6 +13,7 @@ const port = process.env.PORT || 9000
 app.use(express.json())
 app.use(cors({ origin: '*'}));
 app.use(userRouter)
+app.use(postsRouter)
 
 app.listen(port, () =>{
     console.log("connected!");

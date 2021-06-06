@@ -11,6 +11,23 @@ const postsSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    time: {
+        type: String,
+        required: true
+    },
+    likes: {
+        type: Number,
+        default: 0
+
+    },
+    photo: {
+        type: Buffer
+    },
+    owner:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     }
 })
 

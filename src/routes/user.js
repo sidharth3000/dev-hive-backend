@@ -21,18 +21,21 @@ const upload = multer({
     }
 })
 
+
 router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
+
+    console.log(req.body)
     
     const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
 
     req.user.avatar = buffer
-    console.log(req.user.avatar)
     await req.user.save()
     res.status(200).send('uploded')
         
 }, (error, req, res, next) => {
     res.status(500).send({error: error.message})
 })
+
 
 router.get('/avatar', auth, async (req, res) => {
     try{
@@ -57,10 +60,11 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
 
 
 router.post('/register', async (req, res) =>{
- console.log('register')
+ console.log(req.body)
 try{
     const user = new User(req.body);
     const token = await user.generateAuthToken()
+    console.log(user)
     res.status(200).send({user, token})
 
     }catch (e){
