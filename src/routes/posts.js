@@ -21,16 +21,22 @@ const upload = multer({
     }
 })
 
-router.post('/create', auth , upload.single('photo'), async (req,res) => {
 
-    const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
+router.post('/create', auth ,upload.single('photo'), async (req,res) => {
+
+var thumb = null;
+
+    if(req.file){
+        const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
+
+        thumb = new Buffer(buffer).toString('base64');
+    }
 
     const post = new Posts({
         ...req.body,
-        owner: req.user._id
+        owner: req.user._id,
+        photo: thumb
     })
-
-    // post.photo = buffer
 
     try{
        await post.save()
@@ -41,17 +47,37 @@ router.post('/create', auth , upload.single('photo'), async (req,res) => {
     }
 })
 
+
 router.get('/posts/me', auth, async (req, res) => {
 
     try{
 
-        const posts = await Posts.find({ owner:req.user._id})
+        var posts = await Posts.find({ owner:req.user._id})
 
+        // posts.forEach(async (post) => {
+        //     var thumb = new Buffer(post.photo).toString('base64');
+        //      post.photo = thumb
+        //     console.log(post.photo)
+        //   });
+
+    
         res.status(200).send(posts)
     }catch(e){
         res.status(400).send({Error: e.message})
     }
     
+})
+
+router.post('/post/del', auth ,async (req, res) => {
+
+    try {
+
+        await Posts.findOneAndDelete({ _id: req.body.id, owner:req.user._id});
+        res.status(200).send('deleted')
+
+    }catch(e) {
+        res.status(400).send({Error: e.message})
+    }
 })
 
 module.exports = router;

@@ -24,11 +24,13 @@ const upload = multer({
 
 router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
 
-    console.log(req.body)
+    console.log(req.file.buffer)
     
     const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
 
-    req.user.avatar = buffer
+    var thumb = new Buffer(buffer).toString('base64');
+
+    req.user.avatar = thumb
     await req.user.save()
     res.status(200).send('uploded')
         
@@ -40,8 +42,8 @@ router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
 router.get('/avatar', auth, async (req, res) => {
     try{
         if(req.user.avatar){
-            var thumb = new Buffer(req.user.avatar).toString('base64');
-            res.status(200).send(thumb);
+            // var thumb = new Buffer(req.user.avatar).toString('base64');
+            res.status(200).send(req.user.avatar);
         }else{
             res.send(201).send()
         }
@@ -89,7 +91,6 @@ router.post('/login', async (req, res) =>{
 
 router.patch('/user/name', auth, async (req, res) => {
     const name = req.body
-    console.log(name)
 
     try {
          req.user.name = req.body.name

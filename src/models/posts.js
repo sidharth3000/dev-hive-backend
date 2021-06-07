@@ -22,7 +22,7 @@ const postsSchema = new mongoose.Schema({
 
     },
     photo: {
-        type: Buffer
+        type: String
     },
     owner:{
         type: mongoose.Schema.Types.ObjectId,
