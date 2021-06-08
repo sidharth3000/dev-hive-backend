@@ -24,7 +24,7 @@ const upload = multer({
 
 router.post('/create', auth ,upload.single('photo'), async (req,res) => {
 
-var thumb = null;
+    var thumb = null;
 
     if(req.file){
         const buffer = await sharp(req.file.buffer).jpeg().toBuffer()
@@ -54,6 +54,10 @@ router.get('/posts/me', auth, async (req, res) => {
 
         var posts = await Posts.find({ owner:req.user._id})
 
+        posts.reverse();
+
+        // posts.populate('owner').execPopulate
+
         // posts.forEach(async (post) => {
         //     var thumb = new Buffer(post.photo).toString('base64');
         //      post.photo = thumb
@@ -66,6 +70,23 @@ router.get('/posts/me', auth, async (req, res) => {
         res.status(400).send({Error: e.message})
     }
     
+})
+
+router.get('/posts', auth, async (req, res) => {
+
+    try {
+
+        let posts = await Posts.find().populate("owner").populate("comment").exec()
+        
+        // await posts.populate("comment").execPopulate()
+
+        posts.reverse();
+
+        res.status(200).send(posts);
+
+    }catch (e) {
+        res.status(400).send({Error: e.message})
+    }
 })
 
 router.post('/post/del', auth ,async (req, res) => {

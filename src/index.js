@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const userRouter = require('./routes/user')
 const postsRouter = require('./routes/posts')
+const commentRouter = require('./routes/comment')
 
 require('./db/mongoose')
          
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use(cors({ origin: '*'}));
 app.use(userRouter)
 app.use(postsRouter)
+app.use(commentRouter)
 
 app.listen(port, () =>{
     console.log("connected!");

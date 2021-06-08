@@ -41,12 +41,10 @@ router.post('/upload', auth,  upload.single('avatar'), async (req, res) => {
 
 router.get('/avatar', auth, async (req, res) => {
     try{
-        if(req.user.avatar){
-            // var thumb = new Buffer(req.user.avatar).toString('base64');
-            res.status(200).send(req.user.avatar);
-        }else{
-            res.send(201).send()
-        }
+
+        // var thumb = new Buffer(req.user.avatar).toString('base64');
+        res.status(200).send(req.user.avatar);
+       
         
     }catch(e){
         res.status(400).send()

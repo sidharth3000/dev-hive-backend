@@ -4,12 +4,10 @@ const validator = require('validator')
 const postsSchema = new mongoose.Schema({
     title:{
         type: String,
-        required: true,
         trim: true
     },
     body: {
         type: String,
-        required: true,
         trim: true,
     },
     time: {
@@ -27,9 +25,18 @@ const postsSchema = new mongoose.Schema({
     owner:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'User'
+        ref: "User"
     }
 })
+
+postsSchema.virtual('comment', {
+    ref: 'Comment',
+    localField: '_id',
+    foreignField: 'post'
+})
+
+postsSchema.set('toObject', { virtuals: true });
+postsSchema.set('toJSON', { virtuals: true });
 
 const Posts = mongoose.model('Posts', postsSchema)
 
