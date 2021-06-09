@@ -89,6 +89,21 @@ router.get('/posts', auth, async (req, res) => {
     }
 })
 
+router.get('/fullpost/', auth,  async( req, res) => {
+
+    console.log(req.body)
+
+    try {
+
+        let post = await Posts.findById(req.body.id).populate("comment").exec()
+        
+        res.status(200).send(post);
+        
+    }catch (e) {
+        res.status(400).send({Error: e.message})
+    }
+})
+
 router.post('/post/del', auth ,async (req, res) => {
 
     try {
