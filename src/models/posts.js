@@ -17,8 +17,12 @@ const postsSchema = new mongoose.Schema({
     likes: {
         type: Number,
         default: 0
-
     },
+    likedBy: [{
+        id: {
+            type: mongoose.Schema.Types.ObjectId
+        }
+    }],
     photo: {
         type: String
     },

@@ -89,13 +89,13 @@ router.get('/posts', auth, async (req, res) => {
     }
 })
 
-router.get('/fullpost/', auth,  async( req, res) => {
+router.post('/fullpost/', auth,  async( req, res) => {
 
     console.log(req.body)
 
     try {
 
-        let post = await Posts.findById(req.body.id).populate("comment").exec()
+        let post = await Posts.findById(req.body.id).populate("comment").populate("owner").exec()
         
         res.status(200).send(post);
         
@@ -112,6 +112,53 @@ router.post('/post/del', auth ,async (req, res) => {
         res.status(200).send('deleted')
 
     }catch(e) {
+        res.status(400).send({Error: e.message})
+    }
+})
+
+router.post('/like', auth, async (req, res) => {
+
+    try{
+
+        let liked = false
+
+        let post = await Posts.findById(req.body.id)
+
+        post.likedBy.forEach(async (user) => {
+            if(user.id == req.user.id){
+                liked = true;
+            }
+        });
+
+        console.log(liked);
+
+        if(liked){
+
+            post.likedBy.forEach(async (item, index, object) => {
+                if(item.id == req.user.id){
+                    object.splice(index, 1);
+                }
+            });
+
+            post.likes = post.likes-1;
+
+
+        }else{
+
+            let id = {
+                id : req.user._id
+            }
+
+            post.likedBy = post.likedBy.concat(id)
+            post.likes = post.likes+1;
+        }
+
+        post.save();
+
+          console.log(post.likedBy)
+
+        res.status(200).send(post);
+    }catch (e) {
         res.status(400).send({Error: e.message})
     }
 })
