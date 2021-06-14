@@ -72,7 +72,7 @@ router.get('/posts/me', auth, async (req, res) => {
     
 })
 
-router.get('/posts', auth, async (req, res) => {
+router.get('/posts', async (req, res) => {
 
     try {
 

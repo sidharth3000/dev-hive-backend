@@ -5,6 +5,7 @@ const { Router } = require('express');
 
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const { sendWelcomeEmail, sendCancelationEmail } = require('../emails/account')
 
 const router = new express.Router()
 
@@ -64,7 +65,7 @@ router.post('/register', async (req, res) =>{
 try{
     const user = new User(req.body);
     const token = await user.generateAuthToken()
-    console.log(user)
+    sendWelcomeEmail(user.email, user.name)
     res.status(200).send({user, token})
 
     }catch (e){
@@ -102,6 +103,7 @@ router.patch('/user/name', auth, async (req, res) => {
 router.delete('/user/me', auth, async (req, res) => {
     console.log("reached")
     try {
+        sendCancelationEmail(req.user.email, req.user.name)
         await req.user.remove()
         res.send(req.user)
     } catch (e) {
