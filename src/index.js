@@ -3,6 +3,7 @@ var bodyParser = require('body-parser')
 const cors = require('cors')
 const http = require('http')
 const socketio = require('socket.io')
+const Filter = require('bad-words')
 
 const userRouter = require('./routes/user')
 const postsRouter = require('./routes/posts')
@@ -34,12 +35,24 @@ io.on('connection', (socket) => {
     socket.emit('connection', "Welcome");
     socket.broadcast.emit('messsage', 'A new use has joined')
 
-    socket.on('sendMessage', (mssg) => {
-        io.emit('message', mssg)
+    // socket.on('join', ({user, room}) => {
+    //     socket.join(room)
+    // })
+
+    socket.on('sendMessage', (mssg, d, user,  callback) => {
+        const filter = new Filter()
+
+        if(filter.isProfane(mssg)){
+            return callback('Profanity is not allowed')
+        }
+
+        io.emit('message', mssg, d, user)
+        callback();
     });   
 
-    socket.on('sendLocation', (location) => {
-        io.emit('message', `https://google.com/maps?=${location.latitude},${location.longitude}`)
+    socket.on('sendLocation', (location, time, user, callback) => {
+        io.emit('locationMessage', `https://google.com/maps?=${location.latitude},${location.longitude}`, time ,user)
+        callback();
     });   
 
     socket.on('disconnect', () => {
