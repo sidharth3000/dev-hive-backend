@@ -8,6 +8,7 @@ const Filter = require('bad-words')
 const userRouter = require('./routes/user')
 const postsRouter = require('./routes/posts')
 const commentRouter = require('./routes/comment')
+const { addUser, removeUser, getUser, getUsersInRoom } = require('./utils/user')
 
 require('./db/mongoose')
          
@@ -31,32 +32,61 @@ app.use(postsRouter)
 app.use(commentRouter)
 
 io.on('connection', (socket) => { 
-   
-    socket.emit('connection', "Welcome");
-    socket.broadcast.emit('messsage', 'A new use has joined')
 
-    // socket.on('join', ({user, room}) => {
-    //     socket.join(room)
-    // })
+    socket.on('join', (username, room, callback) => {
+
+        const {error, user} = addUser({id: socket.id, username, room })
+
+        if(error) {
+            callback(error)
+        }
+
+        socket.join(room)
+
+        socket.emit('message', "Welcome!", "12:30", "Admin");
+        socket.broadcast.to(room).emit('message', `${username} has joined!`, "12:30", "Admin");
+
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
+
+        callback();
+    })
 
     socket.on('sendMessage', (mssg, d, user,  callback) => {
+
+        const u = getUser(socket.id);
+
         const filter = new Filter()
 
         if(filter.isProfane(mssg)){
             return callback('Profanity is not allowed')
         }
 
-        io.emit('message', mssg, d, user)
+        io.to(u.room).emit('message', mssg, d, user)
         callback();
     });   
 
     socket.on('sendLocation', (location, time, user, callback) => {
+        
         io.emit('locationMessage', `https://google.com/maps?=${location.latitude},${location.longitude}`, time ,user)
         callback();
     });   
 
     socket.on('disconnect', () => {
-        io.emit('messsage', 'a user has left')
+
+        const user = removeUser(socket.id);
+
+        if(user){
+            io.to(user.room).emit('message', `${user.username} has left!`, "12:30", "Admin")
+            io.to(user.room).emit('roomData', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
+        }
+    
+        
     })
 });
 
